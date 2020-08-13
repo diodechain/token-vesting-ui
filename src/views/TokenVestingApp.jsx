@@ -7,6 +7,8 @@ import Header from './Header'
 import VestingDetails from './VestingDetails'
 import VestingSchedule from './VestingSchedule'
 import Spinner from './Spinner'
+import Network from "./../network"
+
 
 import '../stylesheets/TokenVestingApp.css'
 
@@ -56,33 +58,33 @@ class TokenVestingApp extends Component {
   }
 
   async getData() {
-    const { address, token } = this.props
+    const { address, _token } = this.props
 
     const tokenVesting = await getTokenVesting(address)
-    const tokenContract = await getSimpleToken(token)
 
-    const start = await tokenVesting.start()
-    const duration = await tokenVesting.duration()
+    const start = await tokenVesting.start.call()
+    const duration = await tokenVesting.duration.call()
     const end = start.plus(duration)
 
-    const balance  = await tokenContract.balanceOf(address)
-    const released = await tokenVesting.released(token)
-    const total = balance.plus(released)
+    const balance  = Network.web3().utils.toBN(await Network.eth().getBalance(address))
+    console.log(balance);
+    const released = await tokenVesting.released.call()
+    const total = released.plus(balance)
 
     this.setState({
       start,
       end,
-      cliff: await tokenVesting.cliff(),
+      cliff: await tokenVesting.cliff.call(),
       total,
       released,
-      vested: await tokenVesting.vestedAmount(token),
-      decimals: await tokenContract.decimals(),
-      beneficiary: await tokenVesting.beneficiary(),
-      owner: await tokenVesting.owner(),
-      revocable: await tokenVesting.revocable(),
-      revoked: await tokenVesting.revoked(token),
-      name: await tokenContract.name(),
-      symbol: await tokenContract.symbol(),
+      vested: await tokenVesting.vestedAmount.call(),
+      decimals: 18,
+      beneficiary: await tokenVesting.beneficiary.call(),
+      owner: await tokenVesting.owner.call(),
+      revocable: await tokenVesting.revocable.call(),
+      revoked: await tokenVesting.revoked.call(),
+      name: "Diode",
+      symbol: "DIO",
       loading: false
     })
   }
