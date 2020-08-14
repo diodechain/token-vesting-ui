@@ -64,12 +64,11 @@ class TokenVestingApp extends Component {
 
     const start = await tokenVesting.start.call()
     const duration = await tokenVesting.duration.call()
-    const end = start.plus(duration)
+    const end = start.add(duration)
 
     const balance  = Network.web3().utils.toBN(await Network.eth().getBalance(address))
-    console.log(balance);
     const released = await tokenVesting.released.call()
-    const total = released.plus(balance)
+    const total = released.add(balance)
 
     this.setState({
       start,

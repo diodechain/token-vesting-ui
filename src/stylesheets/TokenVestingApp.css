@@ -1,6 +1,9 @@
 .TokenVestingApp {
-  background-color: #fafbfc;
   text-align: center;
+}
+
+body {
+  background-image: url('/background.png');
 }
 
 a {
@@ -12,13 +15,18 @@ a:hover {
   text-decoration: underline;
 }
 
+a:visited {
+  color: #d35129;
+  text-decoration: underline;
+}
+
 .header {
   margin-bottom: 30px;
   padding: 20px;
-  background-color: white;
+  background-color: #2d3e50;
 
   text-align: left;
-  color: black;
+  color: white;
   border-bottom: 1px solid #ecf0f2;
 }
 
@@ -42,7 +50,7 @@ a:hover {
 }
 
 .contracts span {
-  color: #333;
+  color: #ccc;
   font-size: 11px;
 }
 

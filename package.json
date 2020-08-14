@@ -2,21 +2,22 @@
   "name": "token-vesting-ui",
   "version": "0.1.0",
   "private": true,
-  "author": "Martín Triay <martriay@gmail.com>",
+  "author": "Dominic Letz <dominic@diode.io>",
+  "homepage": "/vesting",
   "dependencies": {
     "bootstrap": "^3.3.7",
     "chart.js": "^2.7.0",
-    "ethereumjs-testrpc": "^6.0.3",
+    "ganache-cli": "^6.10.1",
     "moment": "^2.19.1",
     "react": "^16.0.0",
     "react-bootstrap": "^0.31.3",
     "react-chartjs-2": "^2.6.4",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.0.14",
+    "react-scripts": "^2.0.0",
     "require-symlink": "^0.2.0",
     "truffle": "^5.1.35",
-    "truffle-contract": "^1.1.11",
+    "truffle-contract": "^4.0.31",
     "web3": "^1.2.11",
     "zeppelin-solidity": "git+https://git@github.com/OpenZeppelin/zeppelin-solidity.git#8e01dd14f9211239213ae7bd4c6af92dd18d4ab7"
   },
@@ -28,5 +29,11 @@
   },
   "requireSymlinks": {
     "contracts": "./build/contracts"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
