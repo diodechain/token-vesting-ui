@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Grid, Row, Col } from 'react-bootstrap'
 
-import { getTokenVesting, getSimpleToken } from '../contracts'
+import { getTokenVesting } from '../contracts'
 
 import Header from './Header'
 import VestingDetails from './VestingDetails'
@@ -58,7 +58,7 @@ class TokenVestingApp extends Component {
   }
 
   async getData() {
-    const { address, _token } = this.props
+    const { address, } = this.props
 
     const tokenVesting = await getTokenVesting(address)
 

@@ -1,5 +1,4 @@
 import Web3 from 'web3'
-import { sleep } from './utils'
 
 const instance = new Web3("wss://staging.diode.io:8443/ws");
 instance.currentProvider.sendAsync = instance.currentProvider.send;
