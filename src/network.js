@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 
-const instance = new Web3("wss://staging.diode.io:8443/ws");
+const instance = new Web3("wss://prenet.diode.io:8443/ws");
 instance.currentProvider.sendAsync = instance.currentProvider.send;
 
 const Network = {

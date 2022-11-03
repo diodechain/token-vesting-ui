@@ -16,7 +16,7 @@ const App = () => (
 const Main = function({ match }) {
   let web3 = new Web3()
   let { address } = match.params
-  let token = "DIO"
+  let token = "DIODE"
 
   // TODO validate TokenVesting address
   return web3.utils.isAddress(address)

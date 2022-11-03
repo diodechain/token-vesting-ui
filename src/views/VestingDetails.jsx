@@ -28,7 +28,7 @@ class VestingDetails extends Component {
   }
 
   render() {
-    const { start, cliff, end, total, released, vested, revocable, beneficiary } = this.props.details
+    const { start, cliff, end, total, released, vested, revocable, beneficiary, owner } = this.props.details
     const releasable = vested ? vested - released : null
 
     return <div className="details">
@@ -71,6 +71,7 @@ class VestingDetails extends Component {
 
           <TableRow title="Revocable">
             <Revocable revocable={ revocable } canRevoke={ this.state.canRevoke } onRevoke={ () => this.onRevoke() } />
+            <ContractLink address={ owner } />
           </TableRow>
         </tbody>
       </Table>
@@ -104,15 +105,16 @@ class VestingDetails extends Component {
   }
 
   async onRelease() {
-    const { token } = this.props
     const { accounts } = this.state
     const tokenVesting = await this.getTokenVesting()
 
     try {
       this.startLoader()
-      await tokenVesting.release(token, { from: accounts[0] })
+      console.log(["from", accounts])
+      await tokenVesting.release({ from: accounts[0] })
       this.props.getData()
     } catch (e) {
+      console.log(e)
       this.stopLoader()
     }
   }
