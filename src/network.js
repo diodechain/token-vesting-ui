@@ -18,9 +18,7 @@ const Network = {
   },
 
   getAccounts() {
-    return new Promise((resolve, reject) => {
-      Network.eth().getAccounts(Network._web3Callback(resolve, reject))
-    })
+    return window.ethereum.request({ method: 'eth_requestAccounts' });
   },
 
   _web3Callback(resolve, reject) {
