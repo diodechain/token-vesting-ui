@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
 import { Grid, Row, Col } from 'react-bootstrap'
-import { getTokenVesting } from '../contracts'
 
 import Header from './Header'
 import VestingDetails from './VestingDetails'
 import VestingSchedule from './VestingSchedule'
 import Error from './Error'
 import Spinner from './Spinner'
-import Network from "./../network"
 import '../stylesheets/TokenVestingApp.css'
 
 class TokenVestingApp extends Component {
@@ -28,7 +26,7 @@ class TokenVestingApp extends Component {
         {this.state.loading ? <Spinner /> : null}
         {this.state.error ? <Error error={this.state.error.message} /> : null}
 
-        <Header address={address} token={token} tokenName={this.state.name} />
+        <Header address={address} token={token} />
 
         <Grid>
           <Row>
@@ -57,16 +55,16 @@ class TokenVestingApp extends Component {
 
   async getData() {
     try {
-      const { address, } = this.props
+      const { address, token } = this.props
 
-      const tokenVesting = await getTokenVesting(address)
+      const tokenVesting = await token.getTokenVesting(address)
 
       const start = await tokenVesting.start.call()
       const duration = await tokenVesting.duration.call()
       const end = start.add(duration)
 
-      const balance = Network.web3().utils.toBN(await Network.eth().getBalance(address))
-      const released = await tokenVesting.released.call()
+      const balance = token.network.web3().utils.toBN(await token.getBalance(address))
+      const released = await token.getReleased(address)
       const total = released.add(balance)
 
       this.setState({
@@ -75,7 +73,7 @@ class TokenVestingApp extends Component {
         cliff: await tokenVesting.cliff.call(),
         total,
         released,
-        vested: await tokenVesting.vestedAmount.call(),
+        vested: await token.getVestedAmount(address),
         decimals: 18,
         beneficiary: await tokenVesting.beneficiary.call(),
         owner: await tokenVesting.owner.call(),
@@ -87,6 +85,7 @@ class TokenVestingApp extends Component {
       })
     } catch (e) {
       this.setState({ loading: true, error: e })
+      console.log(e)
     }
   }
 }

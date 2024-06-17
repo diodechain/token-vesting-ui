@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
+import "./deps/SafeERC20.sol";
 import "./deps/Ownable.sol";
 import "./deps/SafeMath.sol";
 
@@ -10,7 +11,7 @@ import "./deps/SafeMath.sol";
  * typical vesting scheme, with a cliff and vesting period. Optionally revocable by the
  * owner.
  */
-contract TokenVestingNative is Ownable {
+contract TokenVesting is Ownable {
     // The vesting schedule is time-based (i.e. using block timestamps as opposed to e.g. block numbers), and is
     // therefore sensitive to timestamp manipulation (which is something miners can do, to a certain degree). Therefore,
     // it is recommended to avoid using short time durations (less than a minute). Typical vesting schemes, with a
@@ -18,12 +19,13 @@ contract TokenVestingNative is Ownable {
     // solhint-disable not-rely-on-time
 
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-    event TokensReleased(uint256 amount);
-    event TokenVestingRevoked();
+    event TokensReleased(address token, uint256 amount);
+    event TokenVestingRevoked(address token);
 
     // beneficiary of tokens after they are released
-    address payable private _beneficiary;
+    address private _beneficiary;
 
     // Durations and timestamps are expressed in UNIX time, the same units as block.timestamp.
     uint256 private _cliff;
@@ -32,11 +34,11 @@ contract TokenVestingNative is Ownable {
 
     bool private _revocable;
 
-    uint256 _released;
-    bool _revoked;
+    mapping (address => uint256) private _released;
+    mapping (address => bool) private _revoked;
 
     /**
-     * @dev Creates a vesting contract that vests its balance of Eth to the
+     * @dev Creates a vesting contract that vests its balance of any ERC20 token to the
      * beneficiary, gradually in a linear fashion until start + duration. By then all
      * of the balance will have vested.
      * @param arg_beneficiary address of the beneficiary to whom vested tokens are transferred
@@ -45,7 +47,7 @@ contract TokenVestingNative is Ownable {
      * @param arg_duration duration in seconds of the period in which the tokens will vest
      * @param arg_revocable whether the vesting is revocable or not
      */
-    constructor (address payable arg_beneficiary, uint256 arg_start, uint256 cliffDuration, uint256 arg_duration, bool arg_revocable) payable {
+    constructor (address arg_beneficiary, uint256 arg_start, uint256 cliffDuration, uint256 arg_duration, bool arg_revocable) {
         require(arg_beneficiary != address(0), "TokenVesting: beneficiary is the zero address");
         // solhint-disable-next-line max-line-length
         require(cliffDuration <= arg_duration, "TokenVesting: cliff is longer than duration");
@@ -59,12 +61,6 @@ contract TokenVestingNative is Ownable {
         _cliff = arg_start.add(cliffDuration);
         _start = arg_start;
     }
-
-
-    /**
-     * Allowing later fund additions
-     */
-    receive() external payable { }
 
     /**
      * @return the beneficiary of the tokens.
@@ -104,68 +100,73 @@ contract TokenVestingNative is Ownable {
     /**
      * @return the amount of the token released.
      */
-    function released() public view returns (uint256) {
-        return _released;
+    function released(address token) public view returns (uint256) {
+        return _released[token];
     }
 
     /**
      * @return true if the token is revoked.
      */
-    function revoked() public view returns (bool) {
-        return _revoked;
+    function revoked(address token) public view returns (bool) {
+        return _revoked[token];
     }
 
     /**
      * @notice Transfers vested tokens to beneficiary.
+     * @param token ERC20 token which is being vested
      */
-    function release() public {
-        uint256 unreleased = releasableAmount();
+    function release(IERC20 token) public {
+        uint256 unreleased = releasableAmount(token);
 
         require(unreleased > 0, "TokenVesting: no tokens are due");
 
-        _released = _released.add(unreleased);
+        _released[address(token)] = _released[address(token)].add(unreleased);
 
-        _beneficiary.transfer(unreleased);
+        token.safeTransfer(_beneficiary, unreleased);
 
-        emit TokensReleased(unreleased);
+        emit TokensReleased(address(token), unreleased);
     }
 
     /**
      * @notice Allows the owner to revoke the vesting. Tokens already vested
      * remain in the contract, the rest are returned to the owner.
+     * @param token ERC20 token which is being vested
      */
-    function revoke() public onlyOwner {
+    function revoke(IERC20 token) public onlyOwner {
         require(_revocable, "TokenVesting: cannot revoke");
-        require(!_revoked, "TokenVesting: token already revoked");
+        require(!_revoked[address(token)], "TokenVesting: token already revoked");
 
-        uint256 balance = address(this).balance;
+        uint256 balance = token.balanceOf(address(this));
 
-        uint256 unreleased = releasableAmount();
+        uint256 unreleased = releasableAmount(token);
         uint256 refund = balance.sub(unreleased);
 
-        _revoked = true;
-        owner().transfer(refund);
+        _revoked[address(token)] = true;
 
-        emit TokenVestingRevoked();
+        token.safeTransfer(owner(), refund);
+
+        emit TokenVestingRevoked(address(token));
     }
 
     /**
      * @dev Calculates the amount that has already vested but hasn't been released yet.
+     * @param token ERC20 token which is being vested
      */
-    function releasableAmount() public view returns (uint256) {
-        return vestedAmount().sub(_released);
+    function releasableAmount(IERC20 token) public view returns (uint256) {
+        return vestedAmount(token).sub(_released[address(token)]);
     }
 
     /**
      * @dev Calculates the amount that has already vested.
+     * @param token ERC20 token which is being vested
      */
-    function vestedAmount() public view returns (uint256) {
-        uint256 currentBalance = address(this).balance;
-        uint256 totalBalance = currentBalance.add(_released);
+    function vestedAmount(IERC20 token) public view returns (uint256) {
+        uint256 currentBalance = token.balanceOf(address(this));
+        uint256 totalBalance = currentBalance.add(_released[address(token)]);
 
         if (block.timestamp < _cliff) {
             return 0;
-        } else if (block.timestamp >= _start.add(_duration) || _revoked) {
+        } else if (block.timestamp >= _start.add(_duration) || _revoked[address(token)]) {
             return totalBalance;
         } else {
             return totalBalance.mul(block.timestamp.sub(_start)).div(_duration);

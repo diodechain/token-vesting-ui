@@ -2,10 +2,7 @@ import React, { Component } from 'react'
 import { Table } from 'react-bootstrap'
 import moment from 'moment'
 
-import { getTokenVesting } from '../contracts'
 import { displayAmount } from '../utils'
-import Network from '../network'
-
 import { ContractLink } from './Links'
 import Emoji from './Emoji'
 
@@ -18,7 +15,8 @@ class VestingDetails extends Component {
 
   async componentWillReceiveProps(nextProps) {
     const { owner, revoked } = nextProps.details
-    const accounts = await Network.getAccounts()
+    // const accounts = await Network.getAccounts()
+    const accounts = []
 
     const isOwner = accounts[0]
       ? owner === accounts[0].toLowerCase()
@@ -36,7 +34,7 @@ class VestingDetails extends Component {
       <Table striped bordered condensed>
         <tbody>
           <TableRow title="Beneficiary">
-            <ContractLink address={ beneficiary } />
+            <ContractLink token={ this.props.token } address={ beneficiary } />
           </TableRow>
 
           <TableRow title="Start date">
@@ -71,7 +69,7 @@ class VestingDetails extends Component {
 
           <TableRow title="Revocable">
             <Revocable revocable={ revocable } canRevoke={ this.state.canRevoke } onRevoke={ () => this.onRevoke() } />
-            <ContractLink address={ owner } />
+            <ContractLink token={ this.props.token } address={ owner } />
           </TableRow>
         </tbody>
       </Table>
@@ -101,7 +99,11 @@ class VestingDetails extends Component {
   }
 
   async getTokenVesting() {
-    return getTokenVesting(this.props.address)
+    return this.props.token.getTokenVesting(this.props.address)
+  }
+
+  async getTokenVestingW() {
+    return this.props.token.getTokenVestingW(this.props.address)
   }
 
   async onRelease() {
