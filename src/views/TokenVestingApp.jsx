@@ -78,9 +78,9 @@ class TokenVestingApp extends Component {
         beneficiary: await tokenVesting.beneficiary.call(),
         owner: await tokenVesting.owner.call(),
         revocable: await tokenVesting.revocable.call(),
-        revoked: await tokenVesting.revoked.call(),
+        revoked: await token.getRevoked(address),
         name: "Diode",
-        symbol: "DIO",
+        symbol: "DIODE",
         loading: false
       })
     } catch (e) {

@@ -4,8 +4,6 @@ import moment from 'moment'
 
 import { displayAmount } from '../utils'
 import { ContractLink } from './Links'
-import Emoji from './Emoji'
-
 
 class VestingDetails extends Component {
   constructor() {
@@ -68,8 +66,7 @@ class VestingDetails extends Component {
           </TableRow>
 
           <TableRow title="Revocable">
-            <Revocable revocable={ revocable } canRevoke={ this.state.canRevoke } onRevoke={ () => this.onRevoke() } />
-            <ContractLink token={ this.props.token } address={ owner } />
+            <Revocable token={ this.props.token } owner={ owner } revocable={ revocable } canRevoke={ this.state.canRevoke } onRevoke={ () => this.onRevoke() } />
           </TableRow>
         </tbody>
       </Table>
@@ -149,11 +146,12 @@ function TableRow({ title, children }) {
 }
 
 
-function Revocable({ revocable, onRevoke, canRevoke }) {
-  if (! revocable) return <Emoji e="❌" />
+function Revocable({ revocable, onRevoke, canRevoke, owner, token }) {
+  if (! revocable) return "Non-revocable"
 
   return <span>
-    <Emoji e="✅" />
+    Revocable by&nbsp;
+    <ContractLink token={ token } address={ owner } />
     { canRevoke ? <a className="action" onClick={ onRevoke }>revoke</a> : null }
   </span>
 }

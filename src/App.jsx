@@ -17,6 +17,8 @@ const App = () => (
 )
 
 const MoonbeamMain = function({ match }) {
+  let TokenVesting = null;
+  
   let token = {
     name: "DIODE",
     address: "0x434116a99619f2B465A137199C38c1Aab0353913",
@@ -24,14 +26,17 @@ const MoonbeamMain = function({ match }) {
     network: Network("wss://moonbeam.api.onfinality.io/ws?apikey=49e8baf7-14c3-4d0f-916a-94abf1c4c14a"),
     contractLink: 'https://moonscan.io/address/',
     getTokenVesting: async function(address) {
-      const TokenVesting = contract(require('./contracts/TokenVesting.json'))
-      TokenVesting.setProvider(this.network.provider())
-      return TokenVesting.at(address)
+      if (TokenVesting == null) { 
+        const TK = contract(require('./contracts/TokenVesting.json'))
+        TK.setProvider(token.network.provider())
+        TokenVesting = await TK.at(address)
+      }
+      return TokenVesting
     },
     getTokenVestingW: async function(address) {
-      const TokenVesting = contract(require('./contracts/TokenVesting.json'))
-      TokenVesting.setProvider(window.ethereum)
-      return TokenVesting.at(address)
+      const tokenVesting = contract(require('./contracts/TokenVesting.json'))
+      tokenVesting.setProvider(window.ethereum)
+      return tokenVesting.at(address)
     },
     getReleased: async function(address) {
       const tokenVesting = await this.getTokenVesting(address)
@@ -39,8 +44,11 @@ const MoonbeamMain = function({ match }) {
     },
     getVestedAmount: async function(address) {
       const tokenVesting = await this.getTokenVesting(address)
-      console.log(tokenVesting)
       return tokenVesting.vestedAmount.call(this.address)
+    },
+    getRevoked: async function(address) {
+      const tokenVesting = await this.getTokenVesting(address)
+      return tokenVesting.revoked.call(this.address)
     },
     getBalance: async function(address) {
       const Token = contract(require('./contracts/IERC20.json'))
@@ -52,7 +60,10 @@ const MoonbeamMain = function({ match }) {
 
   return Main(token, match)
 }
+
 const DiodeMain = function({ match }) {
+  let TokenVesting = null;
+
   let token = {
     name: "DIODE",
     address: null,
@@ -60,9 +71,12 @@ const DiodeMain = function({ match }) {
     network: Network("wss://prenet.diode.io:8443/ws"),
     contractLink: 'https://diode.io/prenet/#/address/',
     getTokenVesting: async function(address) {
-      const TokenVesting = contract(require('./contracts/TokenVestingNative.json'))
-      TokenVesting.setProvider(this.network.provider())
-      return TokenVesting.at(address)
+      if (TokenVesting == null) { 
+        const TK = contract(require('./contracts/TokenVestingNative.json'))
+        TK.setProvider(token.network.provider())
+        TokenVesting = await TK.at(address)
+      }
+      return TokenVesting
     },
     getTokenVestingW: async function(address) {
       const TokenVesting = contract(require('./contracts/TokenVestingNative.json'))
@@ -70,12 +84,16 @@ const DiodeMain = function({ match }) {
       return TokenVesting.at(address)
     },
     getReleased: async function(address) {
-      const tokenVesting = this.getTokenVesting(address)
+      const tokenVesting = await this.getTokenVesting(address)
       return tokenVesting.released.call()
     },
     getVestedAmount: async function(address) {
-      const tokenVesting = this.getTokenVesting(address)
+      const tokenVesting = await this.getTokenVesting(address)
       return tokenVesting.vestedAmount.call()
+    },
+    getRevoked: async function(address) {
+      const tokenVesting = await this.getTokenVesting(address)
+      return tokenVesting.revoked.call()
     },
     getBalance: async function(address) {
       return await this.network.eth().getBalance(address)

@@ -25,13 +25,19 @@ class VestingChart extends Component {
 
     const points = [ this.getDataPointAt(start) ]
 
-    // Add signitificant datapoints. Order matters.
+    // Add significant datapoints. Order matters.
     if (cliff < now) {
       points.push(this.getDataPointAt(cliff))
     }
 
     if (start < now && now < end) {
-      points.push(this.getDataPointAt(now))
+      let style = {
+        pointBorderColor: 'rgba(92,92,241,1)',
+        pointBackgroundColor: 'rgba(92,92,241,1)',
+        pointHoverBackgroundColor: 'rgba(92,92,241,1)',
+        pointStyle: 'rect',
+      }
+      points.push(this.getDataPointAt(now, style))
     }
 
     if (cliff > now) {
@@ -43,10 +49,11 @@ class VestingChart extends Component {
     return points
   }
 
-  getDataPointAt(date) {
+  getDataPointAt(date, opts) {
     return {
       x: this.formatDate(date),
-      y: this.getAmountAt(date)
+      y: this.getAmountAt(date),
+      ...opts
     }
   }
 
@@ -86,14 +93,11 @@ class VestingChart extends Component {
     }
   }
 
-  fromBaseDataset(opts) {
-    return {
-      lineTension: 0.1,
-      backgroundColor: 'rgba(241,92,46,0.4)',
-      borderColor: 'rgba(241,92,46,1)',
-      borderJoinStyle: 'miter',
+  fromBaseDataset({data}) {
+    let defaults = {
       pointBorderColor: 'rgba(241,92,46,1)',
       pointBackgroundColor: 'rgba(241,92,46,1)',
+      pointStyle: 'circle',
       pointBorderWidth: 1,
       pointHoverRadius: 5,
       pointHoverBackgroundColor: 'rgba(241,92,46,1)',
@@ -101,8 +105,30 @@ class VestingChart extends Component {
       pointHoverBorderWidth: 2,
       pointRadius: 5,
       pointHitRadius: 10,
-      ...opts
     }
+
+    let dataset = {
+      data: data,
+      lineTension: 0.1,
+      backgroundColor: 'rgba(241,92,46,0.4)',
+      borderColor: 'rgba(241,92,46,1)',
+      borderJoinStyle: 'miter',
+    }
+
+    for (let key in defaults) {
+      dataset[key] = []
+    }
+    for (let i in data) {
+      for (let key in defaults) {
+        if (data[i][key] !== undefined) {
+          dataset[key].push(data[i][key])
+        } else {
+          dataset[key].push(defaults[key])
+        }
+      }
+    }
+
+    return dataset
   }
 }
 
