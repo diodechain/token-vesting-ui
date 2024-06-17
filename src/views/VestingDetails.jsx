@@ -106,7 +106,7 @@ class VestingDetails extends Component {
 
   async onRelease() {
     const { accounts } = this.state
-    const tokenVesting = await this.getTokenVesting()
+    const tokenVesting = await this.getTokenVestingW()
 
     try {
       this.startLoader()
@@ -122,7 +122,7 @@ class VestingDetails extends Component {
   async onRevoke() {
     const { token } = this.props
     const { accounts } = this.state
-    const tokenVesting = await this.getTokenVesting()
+    const tokenVesting = await this.getTokenVestingW()
 
     try {
       this.startLoader()

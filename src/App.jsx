@@ -1,7 +1,8 @@
 import React from 'react'
 import { HashRouter as Router, Route, Switch } from 'react-router-dom'
-import Web3 from 'web3'
+import Error from './views/Error'
 
+import Network from './network'
 import TokenVestingApp from './views/TokenVestingApp'
 
 const App = () => (
@@ -14,18 +15,17 @@ const App = () => (
 )
 
 const Main = function({ match }) {
-  let web3 = new Web3()
+  let web3 = Network.web3()
   let { address } = match.params
   let token = "DIODE"
 
   // TODO validate TokenVesting address
-  return web3.utils.isAddress(address)
-    ? <TokenVestingApp address={ address } token={ token } />
-    : <MissingAddress />
+  if (!web3.utils.isAddress(address)) return <MissingAddress />
+  return <TokenVestingApp address={ address } token={ token } />
 }
 
 const MissingAddress = () => (
-  <p>This is not a TokenVesting address :(</p>
+  <Error error="This is not an address :(" />
 )
 
 export default App

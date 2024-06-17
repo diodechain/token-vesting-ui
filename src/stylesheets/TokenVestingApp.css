@@ -87,6 +87,24 @@ a:visited {
   height: 50px;
 }
 
+.error {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding-top: 300px;
+  background: rgba(255, 225, 225, .8);
+  font-weight: bold;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+}
+
+.error p {
+  margin: 20px;
+}
+
+
 .emoji {
   vertical-align: middle;
 }
