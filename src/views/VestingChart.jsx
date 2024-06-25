@@ -22,31 +22,16 @@ class VestingChart extends Component {
   getPoints() {
     const { start, cliff, end } = this.props.details
     const now = new Date() / 1000 // normalize to seconds
-
-    const points = [ this.getDataPointAt(start) ]
-
-    // Add significant datapoints. Order matters.
-    if (cliff < now) {
-      points.push(this.getDataPointAt(cliff))
+    const now_style = {
+      pointBorderColor: 'rgba(92,92,241,1)',
+      pointBackgroundColor: 'rgba(92,92,241,1)',
+      pointHoverBackgroundColor: 'rgba(92,92,241,1)',
+      pointStyle: 'rect',
     }
 
-    if (start < now && now < end) {
-      let style = {
-        pointBorderColor: 'rgba(92,92,241,1)',
-        pointBackgroundColor: 'rgba(92,92,241,1)',
-        pointHoverBackgroundColor: 'rgba(92,92,241,1)',
-        pointStyle: 'rect',
-      }
-      points.push(this.getDataPointAt(now, style))
-    }
-
-    if (cliff > now) {
-      points.push(this.getDataPointAt(cliff))
-    }
-
-    points.push(this.getDataPointAt(end))
-
-    return points
+    return [ now, start, cliff, end ].sort().map((date) => 
+      this.getDataPointAt(date, date === now ? now_style : {})
+    )
   }
 
   getDataPointAt(date, opts) {
@@ -65,7 +50,7 @@ class VestingChart extends Component {
     const { total, start, end, decimals } = this.props.details
     const slope = (date - start) / (end - start)
 
-    return displayAmount(total, decimals) * slope
+    return Math.max(0, displayAmount(total, decimals) * slope)
   }
 
   chartOptions() {
