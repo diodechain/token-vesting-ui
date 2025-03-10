@@ -58,7 +58,7 @@ const MoonbeamMain = function({ match }) {
     },
   }
 
-  return Main(token, match)
+  return Main(token, match, match.params.address)
 }
 
 const DiodeMain = function({ match }) {
@@ -100,13 +100,13 @@ const DiodeMain = function({ match }) {
     }
   }
 
-  return Main(token, match)
+  return Main(token, match, match.params.address)
 }
 
-const Main = function(token, match) {
+const Main = function(token, match, key) {
   let { address } = match.params
   if (!token.network.web3().utils.isAddress(address)) return <MissingAddress />
-  return <TokenVestingApp address={ address } token={ token } />
+  return <TokenVestingApp key={key} address={address} token={token} />
 }
 
 const MissingAddress = () => (
