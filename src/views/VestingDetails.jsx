@@ -13,8 +13,7 @@ class VestingDetails extends Component {
 
   async componentWillReceiveProps(nextProps) {
     const { owner, revoked } = nextProps.details
-    // const accounts = await Network.getAccounts()
-    const accounts = []
+    const accounts = await nextProps.token.network.getAccounts(false)
 
     const isOwner = accounts[0]
       ? owner === accounts[0].toLowerCase()
@@ -104,7 +103,7 @@ class VestingDetails extends Component {
   }
 
   async onRelease() {
-    const { accounts } = this.state
+    const accounts = await this.props.token.network.getAccounts(true)
     const tokenVesting = await this.getTokenVestingW()
 
     try {

@@ -5,6 +5,8 @@ const Network = function (url) {
   instance.currentProvider.sendAsync = instance.currentProvider.send;
 
   return {
+    accounts: [],
+
     web3() {
       return instance
     },
@@ -18,9 +20,11 @@ const Network = function (url) {
       return this.web3().currentProvider
     },
 
-    getAccounts() {
-      return []
-      // return window.ethereum.request({ method: 'eth_requestAccounts' });
+    async getAccounts(force) {
+      if (window.ethereum && (force || window.ethereum.enabled)) {
+        this.accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      }
+      return this.accounts
     },
 
     _web3Callback(resolve, reject) {
